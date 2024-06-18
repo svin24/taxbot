@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxBot -- By John</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .form-container {
+            position: sticky;
+            bottom: 0;
+            background-color: #f9f9f9;
+            padding: 10px;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        .conversation {
+            list-style: none;
+            padding: 0;
+        }
+        .conversation li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to TaxBot -- By John</h1>
+        <ul class="conversation" id="conversation"></ul>
+    </div>
+    <div class="form-container">
+        <form id="taxForm">
+            <label for="income">Income:</label>
+            <input type="text" id="income" name="income" required>
+            <br>
+            <label for="expenses">Expenses:</label>
+            <input type="text" id="expenses" name="expenses" required>
+            <br>
+            <label for="prompt">AI Chatbot Prompt:</label>
+            <textarea id="prompt" name="prompt" required></textarea>
+            <br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+        document.getElementById('taxForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            fetch('/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const conversation = document.getElementById('conversation');
+
+                const userMessage = document.createElement('li');
+                userMessage.innerHTML = `<strong>Prompt:</strong> ${data.prompt}`;
+                conversation.appendChild(userMessage);
+
+                const botMessage = document.createElement('li');
+                botMessage.innerHTML = `<strong>TaxBot Response:</strong> ${data.ai_response}`;
+                conversation.appendChild(botMessage);
+
+                document.getElementById('income').value = '';
+                document.getElementById('expenses').value = '';
+                document.getElementById('prompt').value = '';
+
+                // Scroll to the bottom of the container
+                const container = document.querySelector('.container');
+                container.scrollTop = container.scrollHeight;
+            });
+        });
+    </script>
+</body>
+</html>
+
