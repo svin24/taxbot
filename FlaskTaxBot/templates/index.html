@@ -21,9 +21,8 @@
         .form-container {
             position: sticky;
             bottom: 0;
-            background-color: #f9f9f9;
+            background-color: #DDDDDD;
             padding: 10px;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
         }
         .result {
             margin-top: 20px;
@@ -48,10 +47,10 @@
     <div class="form-container">
         <form id="taxForm">
             <label for="income">Income:</label>
-            <input type="text" id="income" name="income" required>
+            <input type="text" id="income" name="income">
             <br>
             <label for="expenses">Expenses:</label>
-            <input type="text" id="expenses" name="expenses" required>
+            <input type="text" id="expenses" name="expenses">
             <br>
             <label for="prompt">AI Chatbot Prompt:</label>
             <textarea id="prompt" name="prompt" required></textarea>
@@ -70,6 +69,12 @@
             })
             .then(response => response.json())
             .then(data => {
+                // alert box on errors
+                if(data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
                 const conversation = document.getElementById('conversation');
 
                 const userMessage = document.createElement('li');
