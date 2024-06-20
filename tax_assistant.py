@@ -1,3 +1,4 @@
+import os
 from flask import Flask, json, jsonify, message_flashed, render_template,request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -31,8 +32,11 @@ with taxBot.app_context():
     db.create_all()
 
 # OpenAI - TaxBot integration
-with open('api_key','r') as file:
-    openai.api_key = file.read().strip()
+if os.environ.get("OPENAI_API_KEY") is None: 
+    with open('api_key','r') as file:
+        openai.api_key = file.read().strip()
+elif os.environ.get("OPENAI_API_KEY") is not None:
+    openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_ai_response(prompt, past_interactions):
     try:
@@ -54,7 +58,7 @@ def get_ai_response(prompt, past_interactions):
         return response.choices[0].message.content
     
     except Exception:
-        return "Error getting response from taxbot"
+        return "Error getting response from taxbot, check your openAI key and or internet connection"
 
 
 
