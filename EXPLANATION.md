@@ -34,3 +34,4 @@
 
 - JS:  
 	DOMContentLoaded Event: Fetches and displays the conversation log from the /log endpoint on page load.
+	

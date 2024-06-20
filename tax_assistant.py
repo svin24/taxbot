@@ -151,4 +151,5 @@ def delete_data(id):
         return jsonify({'error':'Data Not Found'}),404
 
 if __name__ == '__main__':
-    taxBot.run(debug=True)
+    # something funny for docker testing
+    taxBot.run(debug=True, host="0.0.0.0")

@@ -26,6 +26,17 @@ source venv/bin/activate
 pip install -r requirements.txt
 python tax_assignment.py 
 ```
+
+### Docker(alternative)
+```
+docker build -t taxbot .
+docker run -p 5000:5000 taxbot
+```
+### Podman(even better)
+```
+podman build -t taxbot .
+podman run -p 5000:5000 localhost/taxbot:latest
+```
 ### Access the application
 
 Open up your browser at `http://127.0.0.1:5000/` to view the application
