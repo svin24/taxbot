@@ -30,13 +30,20 @@ python tax_assignment.py
 ### Docker(alternative)
 ```
 docker build -t taxbot .
+docker run -p 5000:5000 -e OPENAI_API_KEY=XXXXXXXXX taxbot # if you do not have api-key as a file  
 docker run -p 5000:5000 taxbot
 ```
 ### Podman(even better)
 ```
 podman build -t taxbot .
+podman run -p 5000:5000 -e OPENAI_API_KEY=XXXXXXXXX localhost/taxbot:latest # if you do not have api-key as a file 
 podman run -p 5000:5000 localhost/taxbot:latest
 ```
+
+### API key is missing! (DOCKER/PODMAN) 
+
+either your api key needs to be put in the file `api-key` or you need to set your `OPENAI_API_KEY` environment variable
+
 ### Access the application
 
 Open up your browser at `http://127.0.0.1:5000/` to view the application
