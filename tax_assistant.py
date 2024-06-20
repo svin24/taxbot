@@ -4,6 +4,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.exc import IntegrityError
 import openai
 from sqlalchemy.util.typing import expand_unions
+from werkzeug.wrappers import response
 
 
 class TaxBase(DeclarativeBase):
@@ -36,15 +37,24 @@ with taxBot.app_context():
 with open('api_key','r') as file:
     openai.api_key = file.read().strip()
 
-def get_ai_response(prompt):
+def get_ai_response(prompt, past_interactions):
     try:
+        messages = [
+            {"role": "system", "content": """You are a digital assistant designed to help people do their Taxes. You will recieve messages in the following format income=Number expenses=Number, prompt=Text. Sometimes the values income and expenses may not be set, in that case just ignore them, in addition to that you will recieve context about previous interactions before the current prompt"""}
+        ]
+        
+        # NOT EFFICIENT AT ALL
+        for interaction in past_interactions:
+            messages.append({"role":"user","content": interaction.prompt})
+            messages.append({"role":"assistant", "content": interaction.ai_resp})
+        
+        messages.append({"role":"user","content": prompt})
+
         response = openai.chat.completions.create(
             model = "gpt-4o",
-            messages = [
-                {"role": "system", "content": """You are a digital assistant designed to help people do their Taxes. You will recieve messages in the following format income=Number expenses=Number, prompt=Text. Sometimes income and expenses might be undefined, if that is the case ignore them completely and focus on the prompt."""},
-                {"role": "user", "content": prompt }
-            ]
+            messages = messages
         )
+
         return response.choices[0].message.content
     except Exception:
         return "Error getting response from taxbot"
@@ -81,11 +91,10 @@ def submit():
         expenses = None
 
     prompt = request.form['prompt']
-    
-    #data_integrity_income_expenses()
-    
+
+    past_interactions = TaxData.query.all()
     final_prompt = 'income={} expenses={}, prompt={}'.format(income,expenses,prompt)
-    ai_response = get_ai_response(final_prompt)
+    ai_response = get_ai_response(final_prompt, past_interactions)
 
     data_integrity_database(income,expenses,prompt,ai_response)
 
