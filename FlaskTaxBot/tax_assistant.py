@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.exc import IntegrityError
 import openai
+from sqlalchemy.sql.sqltypes import NullType
 
 class TaxBase(DeclarativeBase):
     pass
@@ -45,7 +46,24 @@ def get_ai_response(prompt):
     except Exception:
         return "Error getting response from taxbot"
 
-
+# data integrity income and expenses MAY be null
+def data_integrity(income,expenses,prompt):
+    try:
+        income = float(income)
+        expenses = float(expenses)
+    except ValueError:
+        # error is handled with an alert box right now. It's fine for an assignment but not a real world program
+        return jsonify({'error': 'Income and Expenses must be numbers'}),400
+    
+    tax_data = TaxData(income=income,expenses=expenses,prompt=prompt)
+    db.session.add(tax_data)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occured'}),500
+    
+    return None
 
 # Flask routing
 @taxBot.route('/')
@@ -54,25 +72,14 @@ def home():
 
 @taxBot.route('/submit', methods=['POST'])
 def submit():
+    income = None
+    expenses = None
+
     income = request.form['income']
     expenses = request.form['expenses']
     prompt = request.form['prompt']
-    
-    # basic database integrity stuff
-    try:
-        income = float(income)
-        expenses = float(expenses)
-    except ValueError:
-        # error is handled with an alert box right now. It's fine for an assignment but not a real world program
-        return jsonify({'error': 'Income and Expenses must be numbers'}),400
 
-    tax_data = TaxData(income=income,expenses=expenses,prompt=prompt)
-    db.session.add(tax_data)
-    try:
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
-        return jsonify({'error': 'Database error occured'}),500
+    data_integrity(income,expenses,prompt)
     
     final_prompt = 'income={} expenses={}, prompt={}'.format(income,expenses,prompt)
 
@@ -86,4 +93,4 @@ def submit():
     })
 
 if __name__ == '__main__':
-    taxBot.run(debug=True)cat text in python
+    taxBot.run(debug=True)
