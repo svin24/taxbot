@@ -1,6 +1,7 @@
 import os
 from flask import Flask, json, jsonify, message_flashed, render_template,request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import except_
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.exc import IntegrityError
 import openai
@@ -33,8 +34,11 @@ with taxBot.app_context():
 
 # OpenAI - TaxBot integration
 if os.environ.get("OPENAI_API_KEY") is None: 
-    with open('api_key','r') as file:
-        openai.api_key = file.read().strip()
+    try:
+        with open('api_key','r') as file:
+            openai.api_key = file.read().strip()
+    except FileNotFoundError:
+        print("OPENAI key not provided, Application will not have AI integration")
 elif os.environ.get("OPENAI_API_KEY") is not None:
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
