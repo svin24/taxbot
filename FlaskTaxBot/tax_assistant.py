@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.exc import IntegrityError
 import openai
-from sqlalchemy.sql.sqltypes import NullType
+from sqlalchemy.util.typing import expand_unions
+
 
 class TaxBase(DeclarativeBase):
     pass
@@ -20,11 +21,13 @@ class TaxData(db.Model):
     income: Mapped[float] = mapped_column(nullable=True)
     expenses: Mapped[float] = mapped_column(nullable=True)
     prompt: Mapped[str]
+    ai_resp: Mapped[str]
 
-    def __init__(self, income, expenses, prompt):
+    def __init__(self, income, expenses, prompt, ai_resp):
         self.income = income
         self.expenses = expenses
         self.prompt = prompt
+        self.ai_resp = ai_resp
 
 with taxBot.app_context():
     db.create_all()
@@ -46,16 +49,11 @@ def get_ai_response(prompt):
     except Exception:
         return "Error getting response from taxbot"
 
-# data integrity income and expenses MAY be null
-def data_integrity(income,expenses,prompt):
-    try:
-        income = float(income)
-        expenses = float(expenses)
-    except ValueError:
-        # error is handled with an alert box right now. It's fine for an assignment but not a real world program
-        return jsonify({'error': 'Income and Expenses must be numbers'}),400
-    
-    tax_data = TaxData(income=income,expenses=expenses,prompt=prompt)
+
+
+def data_integrity_database(income,expenses,prompt,ai_resp):
+
+    tax_data = TaxData(income=income,expenses=expenses,prompt=prompt, ai_resp=ai_resp)
     db.session.add(tax_data)
     try:
         db.session.commit()
@@ -72,18 +70,24 @@ def home():
 
 @taxBot.route('/submit', methods=['POST'])
 def submit():
-    income = None
-    expenses = None
+    try:
+        income = float(request.form['income'])
+    except ValueError:
+        income = None
+    
+    try:
+        expenses = float(request.form['expenses'])
+    except ValueError:
+        expenses = None
 
-    income = request.form['income']
-    expenses = request.form['expenses']
     prompt = request.form['prompt']
-
-    data_integrity(income,expenses,prompt)
+    
+    #data_integrity_income_expenses()
     
     final_prompt = 'income={} expenses={}, prompt={}'.format(income,expenses,prompt)
-
     ai_response = get_ai_response(final_prompt)
+
+    data_integrity_database(income,expenses,prompt,ai_response)
 
     return jsonify({
         'income': income,
