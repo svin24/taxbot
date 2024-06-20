@@ -8,10 +8,9 @@ An AI chatbot that will help you with taxes!
 
 ### Setup
 
-Requires `Python`,`pip`.
+Requires `Python 3.12`,`pip`.
 
 ```bash
-cd FlaskTaxBot
 python -m venv venv # setup environment
 source venv/bin/activate # source environment
 pip install Flask # install Flask
