@@ -1,11 +1,8 @@
-from flask import Flask, jsonify, render_template,request
+from flask import Flask, json, jsonify, message_flashed, render_template,request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.exc import IntegrityError
 import openai
-from sqlalchemy.util.typing import expand_unions
-from werkzeug.wrappers import response
-
 
 class TaxBase(DeclarativeBase):
     pass
@@ -89,8 +86,11 @@ def submit():
         expenses = float(request.form['expenses'])
     except ValueError:
         expenses = None
-
-    prompt = request.form['prompt']
+    
+    try:
+        prompt = request.form['prompt']
+    except ValueError:
+        return jsonify({'error':'Unknown issue with text field'}),400
 
     past_interactions = TaxData.query.all()
     final_prompt = 'income={} expenses={}, prompt={}'.format(income,expenses,prompt)
@@ -104,6 +104,31 @@ def submit():
         'prompt': prompt,
         'ai_response': ai_response
     })
+
+@taxBot.route('/data/<int:id>', methods=['GET'])
+def get_data(id):
+    tax_data = TaxData.query.get(id)
+    if tax_data:
+        return jsonify({
+            'id': tax_data.id,
+        'income': tax_data.income,
+        'expenses': tax_data.expenses,
+        'prompt': tax_data.prompt,
+        'ai_resp': tax_data.ai_resp
+    })
+    else:
+        return jsonify({'error':'Data Not Found'}),404
+
+@taxBot.route('/data/<int:id>', methods=['DELETE'])
+def delete_data(id):
+    tax_data = TaxData.query.get(id)
+    if tax_data:
+        db.session.delete(tax_data)
+        db.session.commit()
+        message = 'Data ID:{} deleted'.format(tax_data.id)
+        return jsonify({'message': message})
+    else:
+        return jsonify({'error':'Data Not Found'}),404
 
 if __name__ == '__main__':
     taxBot.run(debug=True)
