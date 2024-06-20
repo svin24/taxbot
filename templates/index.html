@@ -59,6 +59,23 @@
         </form>
     </div>
     <script>
+        // recover log
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/log')
+                .then(response => response.json())
+                .then(data => {
+                    const conversation = document.getElementById('conversation');
+                    data.forEach(entry => {
+                        const userMessage = document.createElement('li');
+                        userMessage.innerHTML = `<strong>Prompt:</strong> ${entry.prompt}`;
+                        conversation.appendChild(userMessage);
+
+                        const botMessage = document.createElement('li');
+                        botMessage.innerHTML = `<strong>TaxBot Response:</strong> ${entry.ai_resp}`;
+                        conversation.appendChild(botMessage);
+                    });
+                });
+        
         document.getElementById('taxForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -94,6 +111,7 @@
                 container.scrollTop = container.scrollHeight;
             });
         });
+    });
     </script>
 </body>
 </html>

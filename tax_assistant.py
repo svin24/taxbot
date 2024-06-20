@@ -51,8 +51,8 @@ def get_ai_response(prompt, past_interactions):
             model = "gpt-4o",
             messages = messages
         )
-
         return response.choices[0].message.content
+    
     except Exception:
         return "Error getting response from taxbot"
 
@@ -74,6 +74,24 @@ def data_integrity_database(income,expenses,prompt,ai_resp):
 @taxBot.route('/')
 def home():
     return render_template("index.html")
+
+
+## various RESTFUL stuff here
+# Get all data for recovery 
+@taxBot.route('/log', methods=['GET'])
+def get_log():
+    log = []
+    all_data = TaxData.query.all()
+    for tax_data in all_data:
+        log.append({
+        'id': tax_data.id,
+        'income': tax_data.income,
+        'expenses': tax_data.expenses,
+        'prompt': tax_data.prompt,
+        'ai_resp': tax_data.ai_resp
+        })
+    return jsonify(log)
+
 
 @taxBot.route('/submit', methods=['POST'])
 def submit():
@@ -105,6 +123,7 @@ def submit():
         'ai_response': ai_response
     })
 
+# data indexing
 @taxBot.route('/data/<int:id>', methods=['GET'])
 def get_data(id):
     tax_data = TaxData.query.get(id)
@@ -119,6 +138,7 @@ def get_data(id):
     else:
         return jsonify({'error':'Data Not Found'}),404
 
+# data deletion
 @taxBot.route('/data/<int:id>', methods=['DELETE'])
 def delete_data(id):
     tax_data = TaxData.query.get(id)
