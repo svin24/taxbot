@@ -70,3 +70,57 @@ POST to submit data:
 ```  
 curl -X POST http://localhost:5000/submit -d "income=50000&expenses=10000&prompt=Help me with my taxes"
 ```
+
+# Application explanation
+
+`tax_assistant.py` - Includes the main application logic, implements REST, and uses openAI
+`templates\index.html` - Webpage template, includes basic CSS and Javascript that uses the REST API
+
+## Flask/SQLalchemy
+
+Application uses Flask as the web framework and Flask-SQLalchemy for handling the database.
+The backend is SQLite and this is the database model:
+
+```
+id [int] - primary key
+income [float] - nullable
+expenses [float] - nullable
+prompt [str] - not nullable
+ai_resp [str] - not nullable
+```
+
+Possibility of not getting a response from the AI exists resulting in ai_resp being NoneType, probably should initialize it as an empty string?
+
+## REST
+It also uses Flask to implement the REST API: the functions implemented can be found above in the **REST api examples** section.
+The functions in program are:
+
+`submit()` - submits data to database (used by JS)
+
+`log()` - Gets all data from database (used by JS)
+
+`get_data()` - Gets data using an ID number
+
+`delete_data()` - Deletes data using an ID number
+
+It is not secure at all but it functions: I do have some ideas on how to improve it on further iterations.
+
+## OpenAI
+
+Reads either the key from an `api_key` file in the project directory or reads the `OPENIAI_API_KEY` environment variable
+Environment variable is prioritized.
+
+AI programming is done in the `get_ai_response(prompt, past_interactions)` function.
+The bot is programmed using json formatted `messages`, using "roles".
+
+A short explanation of the "roles" as I understand them:
+
+`system` - Defines conversation topic
+
+`user` - The user input
+
+`assistant` - The responses to user inputs.
+
+Right now the process is very inefficient because it reads the entire database log, it is really not scalable. 
+But honestly matters little for such a small scale assignment.
+**I do have some ideas for improving this however.**
