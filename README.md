@@ -33,13 +33,15 @@ docker build -t taxbot .
 docker run -p 5000:5000 -e OPENAI_API_KEY=XXXXXXXXX taxbot # if you do not have api-key as a file  
 docker run -p 5000:5000 taxbot
 ```
+Alternatively you can also pull the image `docker pull ghcr.io/svin24/taxbot:latest`
+
 ### Podman(even better)
 ```
 podman build -t taxbot .
 podman run -p 5000:5000 -e OPENAI_API_KEY=XXXXXXXXX localhost/taxbot:latest # if you do not have api-key as a file 
 podman run -p 5000:5000 localhost/taxbot:latest
 ```
-
+Alternatively you can also pull the image `podman pull ghcr.io/svin24/taxbot:latest`
 ### API key is missing! (DOCKER/PODMAN) 
 
 either your api key needs to be put in the file `api-key` or you need to set your `OPENAI_API_KEY` environment variable
