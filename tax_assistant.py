@@ -13,7 +13,7 @@ db = SQLAlchemy(model_class=TaxBase)
 taxBot = Flask(__name__)
 taxBot.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///taxbot_data.db'
 
-## database setup araea
+## database setup area
 db.init_app(taxBot)
 
 class TaxData(db.Model):

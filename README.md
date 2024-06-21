@@ -14,7 +14,7 @@ tax_assistant.py # main program
 templates/index.html  # HTML for the project
 ```
 
-More detailed overview [here](EXPLANATION.md)!
+More detailed overview [here](TaxBot presentation.pdf)!
 
 ### Setup
 
